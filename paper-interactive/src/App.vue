@@ -2,8 +2,6 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { reviewDataset } from '@/data/reviewAccess'
-
 const route = useRoute()
 
 const nav = [
@@ -15,6 +13,8 @@ const nav = [
   { path: '/compare', label: '对读器', hint: 'Compare' },
   { path: '/library', label: '文献库', hint: 'Library' },
 ]
+
+const isActive = (path: string) => route.path === path || (path !== '/' && route.path.startsWith(`${path}/`))
 
 const pageMeta = computed(() => {
   const meta = route.meta as {
@@ -29,11 +29,6 @@ const pageMeta = computed(() => {
     intro: meta.intro ?? '文献综述、参考文献与论文稿件的一体化静态站点。',
   }
 })
-
-const datasetNote = computed(
-  () =>
-    `${reviewDataset.meta.referenceCount} 篇文献 / ${reviewDataset.meta.verifiedCount} 篇已核验 / ${reviewDataset.meta.downloadedCount} 份本地 PDF`,
-)
 </script>
 
 <template>
@@ -55,7 +50,7 @@ const datasetNote = computed(
             :key="item.path"
             :to="item.path"
             class="nav-link"
-            :class="{ active: route.path === item.path }"
+            :class="{ active: isActive(item.path) }"
           >
             <span class="nav-hint">{{ item.hint }}</span>
             <span>{{ item.label }}</span>
@@ -70,11 +65,6 @@ const datasetNote = computed(
           <p class="eyebrow">{{ pageMeta.kicker }}</p>
           <h1 class="page-title">{{ pageMeta.title }}</h1>
           <p class="page-note">{{ pageMeta.intro }}</p>
-        </div>
-        <div class="page-status">
-          <span class="status-pill status-good">静态部署就绪</span>
-          <span class="status-pill status-warn">旧论文内容已清空</span>
-          <span class="dataset-note">{{ datasetNote }}</span>
         </div>
       </section>
 
@@ -292,20 +282,6 @@ a {
   max-width: 44rem;
   color: var(--text-muted);
   line-height: 1.8;
-}
-
-.page-status {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-  text-align: right;
-}
-
-.dataset-note {
-  color: var(--text-muted);
-  font-size: 13px;
-  line-height: 1.7;
 }
 
 .panel {
@@ -668,6 +644,34 @@ a {
   min-height: 280px;
 }
 
+.formula-block {
+  margin: 6px 0 10px;
+  padding: 16px 18px;
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(47, 93, 85, 0.18);
+  background: linear-gradient(180deg, rgba(241, 248, 246, 0.94), rgba(232, 241, 238, 0.9));
+  color: var(--accent-alt);
+}
+
+.formula-inline {
+  color: var(--accent-alt);
+}
+
+mjx-container {
+  max-width: 100%;
+}
+
+.formula-block mjx-container,
+.formula-inline mjx-container {
+  margin: 0 !important;
+}
+
+mjx-container[jax='SVG'] {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 .page-enter-active,
 .page-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -690,11 +694,6 @@ a {
   .section-header {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .page-status {
-    align-items: flex-start;
-    text-align: left;
   }
 
   .hero-grid,

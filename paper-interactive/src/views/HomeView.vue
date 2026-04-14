@@ -11,6 +11,33 @@ import {
 } from '@/data/reviewAccess'
 import { paperWorkspace } from '@/data/paperWorkspace'
 
+const paperSections = [
+  {
+    path: '/paper',
+    kicker: 'Overview',
+    title: '论文总览',
+    summary: '从研究对象、四个缺口、四项贡献和整体闭环把全文主线固定下来。',
+  },
+  {
+    path: '/paper/method',
+    kicker: 'Method',
+    title: '方法与公式',
+    summary: '集中展示 TSFB、TSHM 与 SECR 的公式入口、结构特征与动作解释。',
+  },
+  {
+    path: '/paper/theory',
+    kicker: 'Theory',
+    title: '理论解释',
+    summary: '集中说明 Hodge 分解、局部旋度、命题 1 到命题 3 和推断边界。',
+  },
+  {
+    path: '/paper/experiment',
+    kicker: 'Protocol',
+    title: '实验设计',
+    summary: '集中整理三层证据、标签构造、校准指标、失败判据与写作模板。',
+  },
+]
+
 const metrics = computed(() => [
   {
     label: '综述章节',
@@ -35,7 +62,6 @@ const metrics = computed(() => [
 ])
 
 const curatedReferences = computed(() => reviewDataset.curatedReferences.slice(0, 6))
-const recentReferences = computed(() => reviewDataset.references.filter((reference) => reference.year >= 2023).length)
 </script>
 
 <template>
@@ -43,31 +69,26 @@ const recentReferences = computed(() => reviewDataset.references.filter((referen
     <section class="hero-grid">
       <article class="panel panel-tight story-card">
         <span class="kicker">Overview</span>
-        <h2>论文、综述与参考文献现在共用一套静态前端。</h2>
+        <h2>论文呈递区已经拆成多页面，综述与参考文献继续作为证据底座运行。</h2>
         <p>
-          新版论文的对象分层、三组件框架和解释边界已经同步进论文工作区；文献综述与参考文献库继续作为理论与证据底座运行。
+          当前首页负责把论文主线、综述主线和参考文献库连到一起。论文部分不再停留在单页摘要，而是拆成总览、方法与公式、理论解释、实验设计四个入口。
         </p>
         <div class="action-row" style="margin-top: 18px">
-          <router-link to="/paper" class="action-link">进入论文页面</router-link>
-          <router-link to="/review" class="action-link action-link-secondary">查看综述骨架</router-link>
+          <router-link to="/paper" class="action-link">进入论文总览</router-link>
+          <router-link to="/paper/method" class="action-link action-link-secondary">查看方法页</router-link>
           <router-link to="/library" class="action-link action-link-secondary">进入文献库</router-link>
         </div>
       </article>
 
       <aside class="panel panel-tight info-card">
-        <span class="kicker">Reading Path</span>
-        <h3>当前站点的阅读顺序</h3>
+        <span class="kicker">Paper Pages</span>
+        <h3>论文展示区的四个入口</h3>
         <div class="list-stack">
-          <div v-for="(step, index) in reviewDataset.readingPath" :key="step" class="note-box">
-            <strong>步骤 {{ index + 1 }}</strong>
-            <div class="muted">{{ step }}</div>
-          </div>
-        </div>
-        <div class="meta-row" style="margin-top: 18px">
-          <span class="status-pill status-good">静态站单应用</span>
-          <span class="status-pill status-good">论文内容已同步</span>
-          <span class="status-pill status-warn">GitHub Pages 友好</span>
-          <span class="status-pill status-muted">{{ recentReferences }} 篇近年文献</span>
+          <router-link v-for="section in paperSections" :key="section.path" :to="section.path" class="outline-button">
+            <div class="metric-label">{{ section.kicker }}</div>
+            <h3>{{ section.title }}</h3>
+            <p>{{ section.summary }}</p>
+          </router-link>
         </div>
       </aside>
     </section>
@@ -78,7 +99,7 @@ const recentReferences = computed(() => reviewDataset.references.filter((referen
           <span class="kicker">Paper Brief</span>
           <h2>{{ paperWorkspace.shortTitle }}</h2>
         </div>
-        <p>{{ paperWorkspace.statusLine }}</p>
+        <p>论文主线已经拆到四个页面，结果图表与正式数值仍保留接入位，不在这一轮提前写死。</p>
       </div>
 
       <div class="grid grid-3">

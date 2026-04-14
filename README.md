@@ -1,17 +1,23 @@
 # paperpages
 
-仓库根目录就是当前 `04_交互网站` 文件夹，不需要额外 clone 导出副本。
+论文与文献的统一静态站，仓库根目录就是当前 `04_交互网站`。
 
-项目包含三部分：
+## 在线地址
 
-1. `paper-interactive/`
-   Vue 3 + Vite + TypeScript 前端。
-2. `content-source/`
-   综述正文、论文原稿副本、参考文献核验清单和本地 PDF。
-3. `scripts/`
-   文献同步、核验和数据生成脚本。
+- 首页: `https://2711944586.github.io/paperpages/#/`
+- 论文总览: `https://2711944586.github.io/paperpages/#/paper`
+- 方法与公式: `https://2711944586.github.io/paperpages/#/paper/method`
+- 理论解释: `https://2711944586.github.io/paperpages/#/paper/theory`
+- 实验设计: `https://2711944586.github.io/paperpages/#/paper/experiment`
+- 文献库: `https://2711944586.github.io/paperpages/#/library`
 
-## 本地启动
+## 目录
+
+- `paper-interactive/`: Vue 3 + Vite 前端
+- `content-source/`: 综述、论文原稿副本、参考文献核验清单和本地 PDF
+- `scripts/`: 同步、抓取和生成前端数据
+
+## 本地更新
 
 ```powershell
 python scripts/build_literature_dataset.py
@@ -20,96 +26,27 @@ npm ci
 npm run dev
 ```
 
-默认地址：
+本地地址: `http://localhost:3001/`
 
-`http://localhost:3001/`
+## 静态部署
 
-## 文献更新
-
-如果你仍在上层研究目录中维护：
-
-1. `../01_文献综述/扩展文献综述.md`
-2. `../05_参考文献/verification_manifest.json`
-3. `../05_参考文献/pdfs/*.pdf`
-
-可以先同步到项目内部：
-
-```powershell
-python scripts/sync_content_source.py
-python scripts/fetch_reference_pdfs.py
-python scripts/build_literature_dataset.py
-```
-
-同步内容包括：
-
-1. `../01_文献综述/扩展文献综述.md`
-2. `../paper_ipm_main.md`
-3. `../05_参考文献/verification_manifest.json`
-4. `../05_参考文献/pdfs/*.pdf`
-
-如果只改了前端，不需要跑同步脚本。
-
-## 构建
-
-```powershell
-python scripts/build_literature_dataset.py
-cd paper-interactive
-npm ci
-npm run build
-```
-
-构建产物：
-
-`paper-interactive/dist/`
-
-## GitHub Actions 静态部署
-
-工作流文件：
-
-`.github/workflows/deploy-interactive-site.yml`
-
-首次发布流程：
-
-1. 在当前目录初始化仓库：
-
-```powershell
-git init -b main
-git remote add origin https://github.com/2711944586/paperpages.git
-```
-
-2. 首次提交并推送：
-
-```powershell
-git add .
-git commit -m "Initialize paperpages static site"
-git push -u origin main
-```
-
-3. 打开 GitHub 仓库 `paperpages`。
-4. 进入 `Settings -> Pages`。
-5. 在 `Build and deployment` 中把 `Source` 设置为 `GitHub Actions`。
-6. 保持默认分支为 `main`。
-7. 每次推送到 `main` 后，Actions 会自动执行：
-   `python scripts/build_literature_dataset.py`
-   `npm ci`
-   `npm run build`
-8. 构建完成后，`paper-interactive/dist/` 会直接发布到 GitHub Pages。
-9. 因为前端使用 `hash` 路由，发布地址通常是：
-   `https://2711944586.github.io/paperpages/#/`
-
-## 推送到远程
-
-日常更新：
+工作流文件: `.github/workflows/deploy-interactive-site.yml`
 
 ```powershell
 python scripts/build_literature_dataset.py
 git add .
-git commit -m "Update paperpages static site"
-git push -u origin main
+git commit -m "Update paperpages"
+git push origin main
 ```
+
+推送后：
+
+1. 打开 `https://github.com/2711944586/paperpages/actions`
+2. 等待 `Deploy Interactive Site` 完成
+3. 打开上面的 Pages 地址
 
 ## 当前内容
 
-1. 论文工作区已同步新版手稿的对象层、机制层、理论边界与评估协议。
-2. 文献展示以附录参考文献和综述正文为主。
-3. 图表、实验数值和插图版位已预留结构位置，待实验与绘图完成后直接替换。
+1. 论文部分已经拆成总览、方法与公式、理论解释、实验设计四个页面，并支持公式渲染。
+2. 文献部分继续使用综述正文、附录文献和本地 PDF 作为底座。
+3. 图表、实验数值和正式插图仍保留版位，等实验结果完成后接入。

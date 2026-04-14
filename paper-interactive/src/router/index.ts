@@ -15,9 +15,36 @@ const routes: RouteRecordRaw[] = [
     path: '/paper',
     component: () => import('@/views/PaperWorkspaceView.vue'),
     meta: {
-      title: '论文工作区',
+      title: '论文总览',
       kicker: 'Manuscript Briefing',
       intro: '展示新版论文的对象分层、核心机制、理论边界与评估协议，图表与结果版位暂缓更新。',
+    },
+  },
+  {
+    path: '/paper/method',
+    component: () => import('@/views/PaperMethodView.vue'),
+    meta: {
+      title: '方法与公式',
+      kicker: 'Method & Formula',
+      intro: '集中解释 TSFB、TSHM 与 SECR 的对象链条、核心公式与动作含义。',
+    },
+  },
+  {
+    path: '/paper/theory',
+    component: () => import('@/views/PaperTheoryView.vue'),
+    meta: {
+      title: '理论解释',
+      kicker: 'Theory Boundary',
+      intro: '集中说明 Hodge 分解、局部旋度、命题边界与框架不能越界到的结论。',
+    },
+  },
+  {
+    path: '/paper/experiment',
+    component: () => import('@/views/PaperExperimentView.vue'),
+    meta: {
+      title: '实验设计',
+      kicker: 'Evaluation Protocol',
+      intro: '集中解释数据层、标签构造、校准指标、失败判据与论文结果页的写法。',
     },
   },
   {

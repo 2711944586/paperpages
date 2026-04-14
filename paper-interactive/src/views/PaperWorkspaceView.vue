@@ -1,5 +1,35 @@
 <script setup lang="ts">
+import { useMathJax } from '@/composables/useMathJax'
 import { paperWorkspace } from '@/data/paperWorkspace'
+
+useMathJax()
+
+const paperSections = [
+  {
+    path: '/paper',
+    kicker: 'Overview',
+    title: '论文总览',
+    summary: '固定研究对象、四个缺口、四项贡献和整体结构。',
+  },
+  {
+    path: '/paper/method',
+    kicker: 'Method',
+    title: '方法与公式',
+    summary: '解释 TSFB、TSHM、SECR 的公式、变量和动作含义。',
+  },
+  {
+    path: '/paper/theory',
+    kicker: 'Theory',
+    title: '理论解释',
+    summary: '解释 Hodge 分解、局部旋度、命题边界与能做什么。',
+  },
+  {
+    path: '/paper/experiment',
+    kicker: 'Protocol',
+    title: '实验设计',
+    summary: '解释三层证据、标签定义、校准指标和失败判据。',
+  },
+]
 </script>
 
 <template>
@@ -25,6 +55,24 @@ import { paperWorkspace } from '@/data/paperWorkspace'
           </div>
         </div>
       </aside>
+    </section>
+
+    <section class="panel panel-tight">
+      <div class="section-header">
+        <div>
+          <span class="kicker">Paper Sections</span>
+          <h2>论文呈递区的页面结构</h2>
+        </div>
+        <p>这一轮先把理论、方法和实验设计讲清，图表与结果等实验完成后按同一结构接入。</p>
+      </div>
+
+      <div class="section-grid">
+        <router-link v-for="section in paperSections" :key="section.path" :to="section.path" class="section-link-card">
+          <div class="metric-label">{{ section.kicker }}</div>
+          <h3>{{ section.title }}</h3>
+          <p>{{ section.summary }}</p>
+        </router-link>
+      </div>
     </section>
 
     <section class="panel panel-tight">
@@ -118,7 +166,7 @@ import { paperWorkspace } from '@/data/paperWorkspace'
           <div class="feature-body">
             <div class="metric-label">{{ feature.mechanism }}</div>
             <h3>{{ feature.title }}</h3>
-            <div class="equation-chip">{{ feature.formula }}</div>
+            <div class="formula-inline">\( {{ feature.formula }} \)</div>
             <p>{{ feature.summary }}</p>
           </div>
         </article>
@@ -270,6 +318,37 @@ import { paperWorkspace } from '@/data/paperWorkspace'
   gap: 10px;
 }
 
+.section-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.section-link-card {
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.74);
+  text-decoration: none;
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.section-link-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(157, 88, 50, 0.24);
+  background: rgba(255, 248, 239, 0.86);
+}
+
+.section-link-card h3 {
+  margin: 8px 0 10px;
+}
+
+.section-link-card p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.75;
+}
+
 .layer-controller {
   margin-top: auto;
   padding-top: 12px;
@@ -345,16 +424,8 @@ import { paperWorkspace } from '@/data/paperWorkspace'
   gap: 2px;
 }
 
-.equation-chip {
-  width: fit-content;
-  margin-bottom: 8px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(47, 93, 85, 0.18);
-  background: rgba(47, 93, 85, 0.08);
-  color: var(--accent-alt);
-  font-size: 12px;
-  line-height: 1;
+.formula-inline {
+  margin: 2px 0 10px;
 }
 
 .deferred-card {
@@ -372,6 +443,7 @@ import { paperWorkspace } from '@/data/paperWorkspace'
 
 @media (max-width: 1080px) {
   .paper-hero,
+  .section-grid,
   .stage-grid {
     grid-template-columns: 1fr;
   }
