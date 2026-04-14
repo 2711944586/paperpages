@@ -1,64 +1,191 @@
 <script setup lang="ts">
-import { paperWorkspace } from '@/data/paperWorkspace'
+import PaperSectionNav from '@/components/PaperSectionNav.vue'
 import { useMathJax } from '@/composables/useMathJax'
 
 useMathJax()
 
-const equations = [
+const foundationEquations = [
   {
-    title: '请求级曝光贡献',
-    note: '位置折扣与内容质量一起决定单次展示对曝光图边权的贡献。',
+    title: '列表动作到曝光量',
     tex: String.raw`e_{r,k}=\gamma^{k-1}\,q(a_{r,k},u_r)`,
+    note: '每个位置都会生产一个带位置折扣的曝光量，这是整篇论文最底层的动作变量。',
   },
   {
-    title: '动态曝光图边权',
-    note: '时间窗口内，把用户 \(i\) 对创作者 \(j\) 的累计曝光聚合为边权 \(f_t(i,j)\)。',
-    tex: String.raw`f_t(i,j)=\sum_{\tau=t-w}^{t}\sum_{r\in\mathcal{R}_{\tau}:u_r=i}\sum_{k:c(a_{r,k})=j} e_{r,k}`,
+    title: '时间窗口内的曝光图边权',
+    tex: String.raw`f_t(i,j)=\sum_{\tau=t-w}^{t}\sum_{r\in\mathcal R_\tau:u_r=i}\sum_{k:c(a_{r,k})=j} e_{r,k}`,
+    note: '把请求日志沿时间窗口聚合后，才得到真正被审计的图对象。',
   },
   {
-    title: '聚合结构风险',
-    note: 'TSHM 输出三类任务风险，聚合风险只作为默认操作化入口，不替代单任务解释。',
-    tex: String.raw`\hat{p}_{\sigma,t}^{\mathrm{agg}}=1-\prod_{m=1}^{3}\left(1-\hat{p}_{\sigma,t}^{(m)}\right)`,
+    title: '方向感知边信号',
+    tex: String.raw`f_t^{(q)}(e)=|f_t(e)|^q\cdot \mathrm{sgn}\!\big(f_t(e)-f_t(\bar e)\big)`,
+    note: '幅度保留体量信息，符号编码互惠差异，使 Hodge 旋度读到方向性失衡而不是单纯体量差。',
   },
   {
-    title: 'SECR 列表级目标',
-    note: '重排序同时平衡效用、分配公平和结构性外部性惩罚。',
-    tex: String.raw`\pi_r^\star=\arg\max_{\pi_r}\;\lambda_u U(\pi_r)-\lambda_f F(\pi_r)-\lambda_s S(\pi_r)`,
+    title: '三元组局部旋度',
+    tex: String.raw`\kappa_{\sigma}^{(q)}(t)=\big(B_{2,t}f_t^{(q)}\big)_\sigma`,
+    note: '三元组是最小的高阶单元，因为局部旋度只有在三角边界上才显形。',
   },
 ]
 
-const riskTasks = [
+const signalCards = [
+  {
+    title: '方向性循环 𝒞',
+    tex: String.raw`\mathcal C_\sigma(t)=\frac{\lvert \kappa_\sigma^{(q)}(t)\rvert}{\sum_{e\in\partial\sigma}\lvert f_t^{(q)}(e)\rvert+\epsilon}`,
+    summary: '度量局部非势流闭合。它回答的不是“谁曝光更多”，而是“是否存在沿三角边界持续回流的方向性模式”。',
+  },
+  {
+    title: '跨群体隔离 𝓘',
+    tex: String.raw`\mathcal I_\sigma(t)=1-\frac{\lvert\{e\in\partial\sigma:g(\mathrm{src}(e))\neq g(\mathrm{tgt}(e))\}\rvert}{\lvert\partial\sigma\rvert}`,
+    summary: '看三元组边界上的边是否主要在群体内部闭合。数值越高，代表跨群体接触越稀缺。',
+  },
+  {
+    title: '时间持续性 𝒫',
+    tex: String.raw`\mathcal P_\sigma(t)=\frac{1}{\lvert\partial\sigma\rvert}\sum_{e\in\partial\sigma}\cos\!\big(\mathbf f_t(e),\mathbf f_{t-1}(e)\big)`,
+    summary: '把一次性波动和持续结构锁定区分开。若持续性高，说明结构不是偶然噪声。',
+  },
+  {
+    title: '放大集中 𝒜',
+    tex: String.raw`\mathcal A_\sigma(t)=\mathrm{HHI}_{\mathrm{norm}}\!\Big(\{f_t^{(q)}(e)\}_{e\in\partial\sigma}\Big)`,
+    summary: '看曝光是否被压在三元组边界上的少数边上，用来识别单向主导和局部放大。',
+  },
+]
+
+const taskEquations = [
   {
     title: '结构性负面事件',
-    summary: '跟踪局部集中度飙升和跨群体多样性崩塌，回答结构条件是否恶化。',
+    tex: String.raw`Y_{\sigma,t+1}^{\mathrm{struct}}=\mathbf1\!\left[\Delta\mathrm{ExposureGini}_{\sigma,t+1}>\delta_1\;\mathrm{or}\;\mathrm{CrossGroupDiv}_{\sigma,t+1}<\tau_2\right]`,
+    note: '标签来自独立结果函数，不是把 TSFB 指标再算一遍。这一设计保证标签和输入在公式上分离。',
   },
   {
     title: '分布性负面事件',
-    summary: '跟踪提供者差距、用户质量差距和尾部饥饿，回答分配公平是否恶化。',
+    tex: String.raw`Y_{\sigma,t+1}^{\mathrm{alloc}}=\mathbf1\!\left[\Delta\mathrm{ProviderGap}>\delta_3\;\mathrm{or}\;\Delta\mathrm{UserQualityDisparity}>\delta_4\;\mathrm{or}\;\mathrm{TailStarvation}>\delta_5\right]`,
+    note: '第二类任务盯住的是分配后果，而不是三元组结构本身，因此它和结构性任务有不同的审计语义。',
   },
   {
     title: '复合性负面事件',
-    summary: '只有结构性和分布性风险同时出现时才触发，用来识别最值得审计的高风险区块。',
+    tex: String.raw`Y_{\sigma,t+1}^{\mathrm{comp}}=Y_{\sigma,t+1}^{\mathrm{struct}}\cdot Y_{\sigma,t+1}^{\mathrm{alloc}}`,
+    note: '只有当结构性与分布性风险同时成立时才触发，用于锁定最值得审计的高风险局部块。',
+  },
+  {
+    title: '聚合风险',
+    tex: String.raw`\hat p_{\sigma,t}^{\mathrm{agg}}=1-\prod_{m=1}^{3}\big(1-\hat p_{\sigma,t}^{(m)}\big)`,
+    note: '这是操作化入口，不是理论上唯一正确的聚合方式。审计目标更窄时，SECR 可以只读单任务风险。',
+  },
+]
+
+const secrEquations = [
+  {
+    title: 'SECR 总目标',
+    tex: String.raw`\mathbf a_r^\star=\arg\max_{\mathbf a_r\in\Pi_K(C_r)}\Big[\lambda_u U(\mathbf a_r,u_r)+\lambda_fF(\mathbf a_r)-\lambda_sS(\mathbf a_r,G_t)\Big]`,
+    note: '这里真正重要的是三项目标的对象不同。效用、分配公平和结构性外部性分别属于不同层。',
+  },
+  {
+    title: '效用项',
+    tex: String.raw`U(\mathbf a_r,u_r)=\sum_{k=1}^{K}\gamma^{k-1}\hat u(a_{r,k},u_r)`,
+    note: '效用项只是保底，不是文章的主角。它的作用是约束干预不能无代价地损害排序质量。',
+  },
+  {
+    title: '提供者公平项',
+    tex: String.raw`F_{\mathrm{provider}}(\mathbf a_r)=-\left|\frac{1}{K}\sum_{k=1}^{K}\mathbf1[c(a_{r,k})\in\mathcal G_{\mathrm{under}}]-\pi_{\mathrm{target}}\right|`,
+    note: '论文把提供者公平放进目标函数，是因为结构外部性沿“谁被展示给谁”的分配轴传导。',
+  },
+  {
+    title: '局部增量风险近似',
+    tex: String.raw`\Delta\hat p_{\sigma,t}^{\mathrm{agg}}(v,k)\approx \nabla_{\mathbf z}\hat p^{\mathrm{agg}}\big|_{\mathbf z=\mathbf z_{\sigma,t}}\cdot \Delta\mathbf z_\sigma(v,k)`,
+    note: '如果每个候选都完整重跑 TSFB+TSHM，重排序根本不可执行；这一近似是把理论模型变成动作原型的桥梁。',
+  },
+]
+
+const methodWarnings = [
+  'TSHM 与 TSFB 在公式上独立，但在过程上共享同一分配数据，因此必须显式报告共享过程依赖。',
+  'SECR 使用的是局部风险近似而不是全图精确重计算，所以它是可审计干预原型，不是福利最优器。',
+  '背景控制层不是“可有可无”的附属部分，它正是用来检验结构特征是否真的有增量价值的强基线框架。',
+]
+
+const notationGuide = [
+  {
+    symbol: String.raw`r, C_r, \mathbf a_r`,
+    summary: '请求、候选集和输出列表，属于行动层对象。',
+  },
+  {
+    symbol: String.raw`G_t=(\mathcal U,E_t,f_t)`,
+    summary: '时间窗口内由日志诱导出的动态曝光图，属于审计层对象。',
+  },
+  {
+    symbol: String.raw`\sigma=[i,j,k]`,
+    summary: '三元组结构单元，是最小的高阶诊断对象。',
+  },
+  {
+    symbol: String.raw`\mathbf z_{\sigma,t}, \hat{\mathbf p}_{\sigma,t}`,
+    summary: '特征向量与风险向量，分别由 TSFB 和 TSHM 产出。',
   },
 ]
 </script>
 
 <template>
   <div class="grid">
+    <PaperSectionNav />
+
     <section class="panel panel-tight">
       <div class="section-header">
         <div>
           <span class="kicker">Method & Formula</span>
-          <h2>方法链与核心公式</h2>
+          <h2>方法页要回答的不是“有哪些模型”，而是“对象如何一步步进入动作”</h2>
         </div>
-        <p>这一页专门解释对象如何进入公式、公式如何进入模型、模型又如何进入列表级动作空间。</p>
+        <p>这一页按四个层次展开：列表动作如何变成曝光图，曝光图如何变成三元组特征，特征如何变成风险，风险又如何回到列表级重排序。</p>
       </div>
 
       <div class="grid grid-2">
-        <article v-for="equation in equations" :key="equation.title" class="paper-card formula-card">
+        <article class="hero-method-card">
+          <div class="metric-label">Method Chain</div>
+          <h3>TSFB 负责“看见结构”，TSHM 负责“判断风险”，SECR 负责“在约束下行动”</h3>
+          <p>如果这三层不分开，论文就会陷入两个问题：一是结构信号和标签定义纠缠在一起，二是干预动作只是在最小化自己的内部分数，无法形成外部可审计的证据链。</p>
+        </article>
+
+        <article class="hero-method-card hero-method-card-accent">
+          <div class="metric-label">Notation</div>
+          <div class="notation-grid">
+            <div v-for="item in notationGuide" :key="item.symbol" class="notation-card">
+              <div class="formula-inline">\( {{ item.symbol }} \)</div>
+              <p>{{ item.summary }}</p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel panel-tight">
+      <div class="section-header">
+        <div>
+          <span class="kicker">Foundation</span>
+          <h2>先把动作、图对象和三元组信号写成公式</h2>
+        </div>
+        <p>方法部分最容易被写得过于抽象。真正需要固定的是这四条公式，因为它们把论文的对象边界钉死了。</p>
+      </div>
+
+      <div class="grid grid-2">
+        <article v-for="equation in foundationEquations" :key="equation.title" class="paper-card formula-card">
           <div class="metric-label">{{ equation.title }}</div>
           <div class="formula-block">$$ {{ equation.tex }} $$</div>
           <p>{{ equation.note }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel panel-tight">
+      <div class="section-header">
+        <div>
+          <span class="kicker">TSFB</span>
+          <h2>TSFB 的重点不是“指标多”，而是“每个指标对应一种不同机制”</h2>
+        </div>
+        <p>四个核心特征跨越旋度方向性流、群体混合、时间惯性和集中放大四条机制线。它们可以相关，但不能互相替代。</p>
+      </div>
+
+      <div class="grid grid-2">
+        <article v-for="signal in signalCards" :key="signal.title" class="paper-card formula-card signal-card">
+          <div class="metric-label">{{ signal.title }}</div>
+          <div class="formula-block">$$ {{ signal.tex }} $$</div>
+          <p>{{ signal.summary }}</p>
         </article>
       </div>
     </section>
@@ -67,17 +194,17 @@ const riskTasks = [
       <article class="panel panel-tight">
         <div class="section-header">
           <div>
-            <span class="kicker">TSFB</span>
-            <h2>从列表动作到三元组结构</h2>
+            <span class="kicker">TSHM</span>
+            <h2>风险模型为什么必须是多任务</h2>
           </div>
-          <p>TSFB 先把请求级动作写成曝光图，再从曝光图中抽取核心结构层与背景控制层。</p>
+          <p>如果只做一个总分，结构恶化和分配不公就会被提前揉在一起，既不利于解释，也不利于后续干预权重配置。</p>
         </div>
 
         <div class="list-stack">
-          <article v-for="feature in paperWorkspace.features" :key="feature.symbol" class="paper-card">
-            <div class="metric-label">{{ feature.symbol }} · {{ feature.title }}</div>
-            <div class="formula-inline">\( {{ feature.formula }} \)</div>
-            <p>{{ feature.summary }}</p>
+          <article v-for="task in taskEquations" :key="task.title" class="paper-card formula-card">
+            <div class="metric-label">{{ task.title }}</div>
+            <div class="formula-block">$$ {{ task.tex }} $$</div>
+            <p>{{ task.note }}</p>
           </article>
         </div>
       </article>
@@ -85,17 +212,14 @@ const riskTasks = [
       <article class="panel panel-tight">
         <div class="section-header">
           <div>
-            <span class="kicker">TSHM</span>
-            <h2>风险标签与模型输出</h2>
+            <span class="kicker">Method Warnings</span>
+            <h2>读方法时最容易忽略的三件事</h2>
           </div>
-          <p>TSHM 不预测手工总分，而是预测三类制度化定义的负面分配事件。</p>
+          <p>这三点如果不提前说清，读者会误以为论文在做一个更复杂但并不更严谨的打分器。</p>
         </div>
 
         <div class="list-stack">
-          <article v-for="task in riskTasks" :key="task.title" class="paper-card">
-            <h3>{{ task.title }}</h3>
-            <p>{{ task.summary }}</p>
-          </article>
+          <div v-for="warning in methodWarnings" :key="warning" class="note-box">{{ warning }}</div>
         </div>
       </article>
     </section>
@@ -103,20 +227,17 @@ const riskTasks = [
     <section class="panel panel-tight">
       <div class="section-header">
         <div>
-          <span class="kicker">Operational Path</span>
-          <h2>方法链的动作解释</h2>
+          <span class="kicker">SECR</span>
+          <h2>SECR 把结构风险接回动作空间的方式</h2>
         </div>
-        <p>真正的解释重点不是模型名字，而是动作顺序与对象边界。TSFB 负责“看见结构”，TSHM 负责“校准风险”，SECR 负责“在约束内行动”。</p>
+        <p>它不是在图上做抽象修补，而是逐位置评估候选项目的局部增量结构风险，用约束重排序的方式把风险信号重新送回推荐动作层。</p>
       </div>
 
-      <div class="stage-grid">
-        <article v-for="stage in paperWorkspace.stages" :key="stage.stage" class="stage-card">
-          <div class="stage-badge">{{ stage.stage }}</div>
-          <h3>{{ stage.title }}</h3>
-          <p>{{ stage.summary }}</p>
-          <div class="pill-row">
-            <span v-for="output in stage.outputs" :key="output" class="pill">{{ output }}</span>
-          </div>
+      <div class="grid grid-2">
+        <article v-for="equation in secrEquations" :key="equation.title" class="paper-card formula-card">
+          <div class="metric-label">{{ equation.title }}</div>
+          <div class="formula-block">$$ {{ equation.tex }} $$</div>
+          <p>{{ equation.note }}</p>
         </article>
       </div>
     </section>
@@ -124,59 +245,68 @@ const riskTasks = [
 </template>
 
 <style scoped>
+.hero-method-card {
+  padding: 26px;
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 248, 239, 0.88)),
+    radial-gradient(circle at top right, rgba(157, 88, 50, 0.08), transparent 42%);
+}
+
+.hero-method-card-accent {
+  background:
+    linear-gradient(180deg, rgba(243, 248, 247, 0.94), rgba(234, 242, 239, 0.9)),
+    radial-gradient(circle at top right, rgba(41, 91, 87, 0.12), transparent 42%);
+}
+
+.hero-method-card h3 {
+  margin: 8px 0 10px;
+  font-family: Georgia, 'Times New Roman', 'Songti SC', serif;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.hero-method-card p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.82;
+}
+
+.notation-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.notation-card {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(41, 91, 87, 0.12);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.notation-card p {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  line-height: 1.72;
+}
+
 .formula-card {
   display: grid;
   gap: 10px;
 }
 
+.signal-card {
+  min-height: 280px;
+}
+
 .formula-inline {
-  margin: 4px 0 2px;
-  color: var(--accent-alt);
-}
-
-.stage-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.stage-card {
-  position: relative;
-  overflow: hidden;
-  padding: 24px;
-  border-radius: 22px;
-  border: 1px solid var(--line);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 248, 239, 0.86)),
-    radial-gradient(circle at top right, rgba(157, 88, 50, 0.12), transparent 42%);
-}
-
-.stage-card h3 {
-  margin: 8px 0 10px;
-}
-
-.stage-card p {
-  margin: 0 0 16px;
-  color: var(--text-muted);
-  line-height: 1.75;
-}
-
-.stage-badge {
-  display: inline-flex;
-  width: fit-content;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(47, 93, 85, 0.12);
-  color: var(--accent-alt);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  margin: 0;
 }
 
 @media (max-width: 1080px) {
-  .stage-grid {
-    grid-template-columns: 1fr;
+  .hero-method-card h3 {
+    font-size: 28px;
   }
 }
 </style>

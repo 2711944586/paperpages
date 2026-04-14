@@ -1,33 +1,62 @@
 <script setup lang="ts">
+import PaperSectionNav from '@/components/PaperSectionNav.vue'
 import { useMathJax } from '@/composables/useMathJax'
 import { paperWorkspace } from '@/data/paperWorkspace'
 
 useMathJax()
 
-const paperSections = [
+const previewEquations = [
   {
-    path: '/paper',
-    kicker: 'Overview',
-    title: '论文总览',
-    summary: '固定研究对象、四个缺口、四项贡献和整体结构。',
+    title: '请求级曝光',
+    tex: String.raw`e_{r,k}=\gamma^{k-1}\,q(a_{r,k},u_r)`,
+    note: '把一次排序决策变成位置加权曝光，是从“列表”走向“结构”的第一步。',
   },
   {
-    path: '/paper/method',
-    kicker: 'Method',
-    title: '方法与公式',
-    summary: '解释 TSFB、TSHM、SECR 的公式、变量和动作含义。',
+    title: '动态曝光图',
+    tex: String.raw`G_t=(\mathcal U,E_t,f_t),\qquad f_t(i,j)=\sum_{\tau=t-w}^{t}\sum_{r:u_r=i}\sum_{k:c(a_{r,k})=j} e_{r,k}`,
+    note: '真正被审计的不是列表本身，而是时间窗口内累积形成的曝光图。',
   },
   {
-    path: '/paper/theory',
-    kicker: 'Theory',
-    title: '理论解释',
-    summary: '解释 Hodge 分解、局部旋度、命题边界与能做什么。',
+    title: '多任务风险向量',
+    tex: String.raw`\hat{\mathbf p}_{\sigma,t}=\big(\hat p_{\sigma,t}^{(1)},\hat p_{\sigma,t}^{(2)},\hat p_{\sigma,t}^{(3)}\big)`,
+    note: '论文不把风险压成一个手工总分，而是保留结构性、分布性和复合性三类事件。',
+  },
+]
+
+const readingQuestions = [
+  {
+    title: '论文究竟在研究什么对象？',
+    summary: '不是态度极化的结果层，而是平台重复分配注意力后，在曝光图上留下的结构条件。',
   },
   {
-    path: '/paper/experiment',
-    kicker: 'Protocol',
-    title: '实验设计',
-    summary: '解释三层证据、标签定义、校准指标和失败判据。',
+    title: '方法为什么必须分成三组件？',
+    summary: '因为“看见结构”“判断风险”“决定动作”在对象层面是三种不同任务，混在一起就会失去可解释性。',
+  },
+  {
+    title: '理论部分真正想证明什么？',
+    summary: '不是证明框架万能，而是说明三元组层确实包含二元分析看不见的信息，并给出干预的受限合理区间。',
+  },
+  {
+    title: '实验层为什么先写协议而不抢写结果？',
+    summary: '因为先固定标签、指标和失败阈值，才能避免结果出来后再反向改口径。',
+  },
+]
+
+const framingCards = [
+  {
+    kicker: 'Old Lens',
+    title: '旧问题写法',
+    summary: '把推荐系统当成一次性排序器，关注单次列表表现、单次公平比例或用户级代理指标。',
+  },
+  {
+    kicker: 'New Lens',
+    title: '新问题写法',
+    summary: '把推荐系统写成重复可见性分配机制，关心这些分配在时间内累积成怎样的局部高阶结构。',
+  },
+  {
+    kicker: 'Audit Unit',
+    title: '最小诊断单元',
+    summary: '选择三元组不是因为它最复杂，而是因为局部旋度只有在三角边界上才可见。',
   },
 ]
 </script>
@@ -45,11 +74,11 @@ const paperSections = [
       </div>
 
       <aside class="paper-hero-side">
-        <div class="note-box">
+        <div class="hero-note">
           <strong>{{ paperWorkspace.shortTitle }}</strong>
-          <div class="muted" style="margin-top: 8px">{{ paperWorkspace.statusLine }}</div>
+          <div class="muted" style="margin-top: 10px">{{ paperWorkspace.statusLine }}</div>
         </div>
-        <div class="list-stack" style="margin-top: 16px">
+        <div class="list-stack">
           <div v-for="anchor in paperWorkspace.anchors" :key="anchor" class="anchor-card">
             {{ anchor }}
           </div>
@@ -57,21 +86,41 @@ const paperSections = [
       </aside>
     </section>
 
+    <PaperSectionNav />
+
     <section class="panel panel-tight">
       <div class="section-header">
         <div>
-          <span class="kicker">Paper Sections</span>
-          <h2>论文呈递区的页面结构</h2>
+          <span class="kicker">Framing Shift</span>
+          <h2>这篇论文首先重写了问题本身</h2>
         </div>
-        <p>这一轮先把理论、方法和实验设计讲清，图表与结果等实验完成后按同一结构接入。</p>
+        <p>它把研究焦点从“单次排序做得好不好”转成“平台重复分配注意力后，会在局部结构上累积出什么条件”。</p>
       </div>
 
-      <div class="section-grid">
-        <router-link v-for="section in paperSections" :key="section.path" :to="section.path" class="section-link-card">
-          <div class="metric-label">{{ section.kicker }}</div>
-          <h3>{{ section.title }}</h3>
-          <p>{{ section.summary }}</p>
-        </router-link>
+      <div class="grid grid-3">
+        <article v-for="item in framingCards" :key="item.title" class="paper-card framing-card">
+          <div class="metric-label">{{ item.kicker }}</div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.summary }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel panel-tight">
+      <div class="section-header">
+        <div>
+          <span class="kicker">Formal Entry</span>
+          <h2>先把对象和公式固定下来</h2>
+        </div>
+        <p>这三条式子对应全文的三个入口：列表动作、审计对象和风险输出。后面的方法、理论和实验层都围绕它们展开。</p>
+      </div>
+
+      <div class="grid grid-3">
+        <article v-for="equation in previewEquations" :key="equation.title" class="paper-card formal-card">
+          <div class="metric-label">{{ equation.title }}</div>
+          <div class="formula-block">$$ {{ equation.tex }} $$</div>
+          <p>{{ equation.note }}</p>
+        </article>
       </div>
     </section>
 
@@ -90,6 +139,23 @@ const paperSections = [
           <h3>{{ layer.object }}</h3>
           <p>{{ layer.summary }}</p>
           <div class="muted layer-controller">{{ layer.controller }}</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="reading-band panel panel-tight">
+      <div class="section-header">
+        <div>
+          <span class="kicker">Reading Questions</span>
+          <h2>读这篇论文时应该持续追问的四个问题</h2>
+        </div>
+        <p>如果这四个问题能在页面里被回答清楚，论文的主线就足够稳；如果回答不清，说明结构还需要继续收束。</p>
+      </div>
+
+      <div class="reading-grid">
+        <article v-for="item in readingQuestions" :key="item.title" class="reading-card">
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.summary }}</p>
         </article>
       </div>
     </section>
@@ -180,7 +246,7 @@ const paperSections = [
             <span class="kicker">Theory</span>
             <h2>理论性质</h2>
           </div>
-          <p>论文的理论部分服务于可信度与边界说明，而不是脱离应用场景的抽象堆砌。</p>
+          <p>理论部分服务于可信度与边界说明，而不是脱离应用场景的抽象堆砌。</p>
         </div>
 
         <div class="list-stack">
@@ -281,21 +347,21 @@ const paperSections = [
 <style scoped>
 .paper-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr);
   gap: 18px;
 }
 
 .paper-hero h2 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", "Songti SC", serif;
-  font-size: clamp(28px, 3.2vw, 42px);
-  line-height: 1.1;
+  font-family: Georgia, 'Times New Roman', 'Songti SC', serif;
+  font-size: clamp(30px, 3.4vw, 44px);
+  line-height: 1.08;
 }
 
 .paper-hero p {
   margin: 16px 0 0;
   color: var(--text-muted);
-  line-height: 1.85;
+  line-height: 1.88;
 }
 
 .paper-hero-side {
@@ -303,13 +369,29 @@ const paperSections = [
   gap: 14px;
 }
 
+.hero-note {
+  padding: 18px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(47, 93, 85, 0.14);
+  background: linear-gradient(180deg, rgba(242, 248, 246, 0.94), rgba(233, 241, 238, 0.86));
+}
+
 .anchor-card {
   padding: 16px 18px;
   border-radius: 18px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.7);
   color: var(--text-muted);
-  line-height: 1.7;
+  line-height: 1.72;
+}
+
+.framing-card {
+  min-height: 182px;
+}
+
+.formal-card {
+  display: grid;
+  gap: 10px;
 }
 
 .layer-card {
@@ -318,40 +400,38 @@ const paperSections = [
   gap: 10px;
 }
 
-.section-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.section-link-card {
-  padding: 22px;
-  border-radius: 22px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.74);
-  text-decoration: none;
-  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
-}
-
-.section-link-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(157, 88, 50, 0.24);
-  background: rgba(255, 248, 239, 0.86);
-}
-
-.section-link-card h3 {
-  margin: 8px 0 10px;
-}
-
-.section-link-card p {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.75;
-}
-
 .layer-controller {
   margin-top: auto;
   padding-top: 12px;
+}
+
+.reading-band {
+  background:
+    linear-gradient(180deg, rgba(255, 248, 239, 0.92), rgba(251, 244, 235, 0.92)),
+    radial-gradient(circle at top left, rgba(157, 88, 50, 0.08), transparent 42%);
+}
+
+.reading-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.reading-card {
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(157, 88, 50, 0.12);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.reading-card h3 {
+  margin: 0 0 10px;
+}
+
+.reading-card p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.8;
 }
 
 .stage-grid {
@@ -367,7 +447,7 @@ const paperSections = [
   border-radius: 22px;
   border: 1px solid var(--line);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 248, 239, 0.86)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 248, 239, 0.88)),
     radial-gradient(circle at top right, rgba(157, 88, 50, 0.12), transparent 42%);
 }
 
@@ -380,7 +460,7 @@ const paperSections = [
 .feature-card p {
   margin: 0 0 16px;
   color: var(--text-muted);
-  line-height: 1.75;
+  line-height: 1.78;
 }
 
 .stage-badge {
@@ -398,7 +478,7 @@ const paperSections = [
 
 .feature-card {
   display: grid;
-  grid-template-columns: 74px minmax(0, 1fr);
+  grid-template-columns: 82px minmax(0, 1fr);
   gap: 18px;
   padding: 24px;
   border-radius: 22px;
@@ -411,10 +491,10 @@ const paperSections = [
   align-items: center;
   justify-content: center;
   aspect-ratio: 1;
-  border-radius: 24px;
-  background: linear-gradient(135deg, rgba(157, 88, 50, 0.9), rgba(112, 55, 24, 0.86));
+  border-radius: 26px;
+  background: linear-gradient(135deg, rgba(157, 88, 50, 0.92), rgba(112, 55, 24, 0.88));
   color: #fff8f1;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Georgia, 'Times New Roman', serif;
   font-size: 32px;
   font-weight: 700;
 }
@@ -425,13 +505,13 @@ const paperSections = [
 }
 
 .formula-inline {
-  margin: 2px 0 10px;
+  margin: 4px 0 10px;
 }
 
 .deferred-card {
   min-height: 182px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 248, 239, 0.72)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 248, 239, 0.74)),
     repeating-linear-gradient(
       -45deg,
       transparent,
@@ -443,7 +523,7 @@ const paperSections = [
 
 @media (max-width: 1080px) {
   .paper-hero,
-  .section-grid,
+  .reading-grid,
   .stage-grid {
     grid-template-columns: 1fr;
   }
@@ -453,7 +533,7 @@ const paperSections = [
   }
 
   .feature-symbol {
-    width: 74px;
+    width: 82px;
   }
 }
 </style>
