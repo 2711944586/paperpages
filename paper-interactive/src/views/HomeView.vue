@@ -9,6 +9,7 @@ import {
   reviewDataset,
   streamDescriptions,
 } from '@/data/reviewAccess'
+import { paperWorkspace } from '@/data/paperWorkspace'
 
 const metrics = computed(() => [
   {
@@ -42,12 +43,14 @@ const recentReferences = computed(() => reviewDataset.references.filter((referen
     <section class="hero-grid">
       <article class="panel panel-tight story-card">
         <span class="kicker">Overview</span>
-        <h2>站点已切换到综述与参考文献主线。</h2>
-        <p>当前内容只保留综述正文、附录参考文献和论文工作区。旧图表、旧仿真和旧稿叙述已经移除。</p>
+        <h2>论文、综述与参考文献现在共用一套静态前端。</h2>
+        <p>
+          新版论文的对象分层、三组件框架和解释边界已经同步进论文工作区；文献综述与参考文献库继续作为理论与证据底座运行。
+        </p>
         <div class="action-row" style="margin-top: 18px">
-          <router-link to="/review" class="action-link">查看综述骨架</router-link>
+          <router-link to="/paper" class="action-link">进入论文页面</router-link>
+          <router-link to="/review" class="action-link action-link-secondary">查看综述骨架</router-link>
           <router-link to="/library" class="action-link action-link-secondary">进入文献库</router-link>
-          <router-link to="/paper" class="action-link action-link-secondary">预留论文页面</router-link>
         </div>
       </article>
 
@@ -62,10 +65,28 @@ const recentReferences = computed(() => reviewDataset.references.filter((referen
         </div>
         <div class="meta-row" style="margin-top: 18px">
           <span class="status-pill status-good">静态站单应用</span>
+          <span class="status-pill status-good">论文内容已同步</span>
           <span class="status-pill status-warn">GitHub Pages 友好</span>
           <span class="status-pill status-muted">{{ recentReferences }} 篇近年文献</span>
         </div>
       </aside>
+    </section>
+
+    <section class="panel panel-tight">
+      <div class="section-header">
+        <div>
+          <span class="kicker">Paper Brief</span>
+          <h2>{{ paperWorkspace.shortTitle }}</h2>
+        </div>
+        <p>{{ paperWorkspace.statusLine }}</p>
+      </div>
+
+      <div class="grid grid-3">
+        <article v-for="anchor in paperWorkspace.anchors" :key="anchor" class="paper-card">
+          <h3>论文口径</h3>
+          <p>{{ anchor }}</p>
+        </article>
+      </div>
     </section>
 
     <section class="grid grid-2">

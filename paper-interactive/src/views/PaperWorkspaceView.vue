@@ -1,49 +1,83 @@
 <script setup lang="ts">
-const clearedModules = [
-  '旧论文总览文案与结论性叙述',
-  '旧图表图廊与旧实验图像资产',
-  '旧仿真结果、旧指标表格与旧术语解释页',
-  '依赖 paper_dashboard.json 的历史数据展示逻辑',
-]
-
-const reservedModules = [
-  '论文标题、摘要与贡献概览',
-  '最终方法框架图与关键公式',
-  '实证结果总览、核心图表与显著性结论',
-  '附录扩展、代码与数据、版本记录',
-  '可选交互演示区与答辩入口',
-]
-
-const upcomingInputs = [
-  '论文定稿正文或最终摘要版本',
-  '确认后的图表编号、标题与高清导出文件',
-  '最终实验表格、统计检验结果与补充材料',
-  '新增交互模块需求',
-]
+import { paperWorkspace } from '@/data/paperWorkspace'
 </script>
 
 <template>
   <div class="grid">
-    <section class="panel panel-tight story-card">
-      <span class="kicker">Paper Reset</span>
-      <h2>论文工作区已经清空旧稿内容。</h2>
-      <p>当前页面保留的是新稿接入所需的版位和模块。</p>
+    <section class="paper-hero panel panel-tight">
+      <div class="paper-hero-copy">
+        <span class="kicker">Manuscript Brief</span>
+        <h2>{{ paperWorkspace.title }}</h2>
+        <p>{{ paperWorkspace.abstract }}</p>
+        <div class="pill-row" style="margin-top: 18px">
+          <span v-for="keyword in paperWorkspace.keywords" :key="keyword" class="pill">{{ keyword }}</span>
+        </div>
+      </div>
+
+      <aside class="paper-hero-side">
+        <div class="note-box">
+          <strong>{{ paperWorkspace.shortTitle }}</strong>
+          <div class="muted" style="margin-top: 8px">{{ paperWorkspace.statusLine }}</div>
+        </div>
+        <div class="list-stack" style="margin-top: 16px">
+          <div v-for="anchor in paperWorkspace.anchors" :key="anchor" class="anchor-card">
+            {{ anchor }}
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="panel panel-tight">
+      <div class="section-header">
+        <div>
+          <span class="kicker">Object Stack</span>
+          <h2>论文把推荐问题拆成三个对象层次</h2>
+        </div>
+        <p>行动对象、审计对象和诊断对象被显式分离，后续方法与结论都围绕这条边界展开。</p>
+      </div>
+
+      <div class="grid grid-3">
+        <article v-for="layer in paperWorkspace.layers" :key="layer.title" class="paper-card layer-card">
+          <div class="metric-label">{{ layer.title }}</div>
+          <h3>{{ layer.object }}</h3>
+          <p>{{ layer.summary }}</p>
+          <div class="muted layer-controller">{{ layer.controller }}</div>
+        </article>
+      </div>
     </section>
 
     <section class="split-layout">
-      <article class="panel panel-tight info-card">
-        <span class="kicker">Cleared</span>
-        <h3>已清除内容</h3>
+      <article class="panel panel-tight">
+        <div class="section-header">
+          <div>
+            <span class="kicker">Research Gaps</span>
+            <h2>四个缺口</h2>
+          </div>
+          <p>新版论文不再围绕旧图表组织，而是围绕对象、诊断、动作和评估四条约束写法展开。</p>
+        </div>
+
         <div class="list-stack">
-          <div v-for="item in clearedModules" :key="item" class="note-box">{{ item }}</div>
+          <article v-for="gap in paperWorkspace.gaps" :key="gap.title" class="paper-card">
+            <h3>{{ gap.title }}</h3>
+            <p>{{ gap.summary }}</p>
+          </article>
         </div>
       </article>
 
-      <article class="panel panel-tight info-card">
-        <span class="kicker">Reserved</span>
-        <h3>预留模块</h3>
+      <article class="panel panel-tight">
+        <div class="section-header">
+          <div>
+            <span class="kicker">Contributions</span>
+            <h2>四项贡献</h2>
+          </div>
+          <p>贡献结构与论文引言保持一致，便于后续直接插入图表和实验结果。</p>
+        </div>
+
         <div class="list-stack">
-          <div v-for="item in reservedModules" :key="item" class="note-box">{{ item }}</div>
+          <article v-for="item in paperWorkspace.contributions" :key="item.title" class="paper-card">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.summary }}</p>
+          </article>
         </div>
       </article>
     </section>
@@ -51,18 +85,303 @@ const upcomingInputs = [
     <section class="panel panel-tight">
       <div class="section-header">
         <div>
-          <span class="kicker">Next Inputs</span>
-          <h2>接入清单</h2>
+          <span class="kicker">Framework Flow</span>
+          <h2>TSFB → TSHM → SECR 的机制闭环</h2>
         </div>
-        <p>新稿完成后，按这份清单替换当前空位。</p>
+        <p>论文的核心不在单个指标，而在“特征提取、风险校准、列表级干预”三段链条被顺序打通。</p>
+      </div>
+
+      <div class="stage-grid">
+        <article v-for="stage in paperWorkspace.stages" :key="stage.stage" class="stage-card">
+          <div class="stage-badge">{{ stage.stage }}</div>
+          <h3>{{ stage.title }}</h3>
+          <p>{{ stage.summary }}</p>
+          <div class="pill-row">
+            <span v-for="output in stage.outputs" :key="output" class="pill">{{ output }}</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel panel-tight">
+      <div class="section-header">
+        <div>
+          <span class="kicker">Core Signals</span>
+          <h2>四个机制对齐特征</h2>
+        </div>
+        <p>核心层覆盖方向性循环、跨群体隔离、时间持续性与放大集中，控制层负责吸收活跃度与体量效应。</p>
       </div>
 
       <div class="grid grid-2">
-        <article v-for="item in upcomingInputs" :key="item" class="paper-card">
-          <h3>{{ item }}</h3>
-          <p>待接入</p>
+        <article v-for="feature in paperWorkspace.features" :key="feature.symbol" class="feature-card">
+          <div class="feature-symbol">{{ feature.symbol }}</div>
+          <div class="feature-body">
+            <div class="metric-label">{{ feature.mechanism }}</div>
+            <h3>{{ feature.title }}</h3>
+            <div class="equation-chip">{{ feature.formula }}</div>
+            <p>{{ feature.summary }}</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="split-layout">
+      <article class="panel panel-tight">
+        <div class="section-header">
+          <div>
+            <span class="kicker">Theory</span>
+            <h2>理论性质</h2>
+          </div>
+          <p>论文的理论部分服务于可信度与边界说明，而不是脱离应用场景的抽象堆砌。</p>
+        </div>
+
+        <div class="list-stack">
+          <article v-for="item in paperWorkspace.propositions" :key="item.title" class="paper-card">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.summary }}</p>
+          </article>
+        </div>
+      </article>
+
+      <article class="panel panel-tight">
+        <div class="section-header">
+          <div>
+            <span class="kicker">Protocol</span>
+            <h2>评估协议</h2>
+          </div>
+          <p>日志评估、失配仿真和历史重放被写成三层证据，不同层回答不同类型的问题。</p>
+        </div>
+
+        <div class="list-stack">
+          <article v-for="tier in paperWorkspace.tiers" :key="tier.title" class="paper-card">
+            <h3>{{ tier.title }}</h3>
+            <p>{{ tier.scope }}</p>
+            <div class="muted" style="margin-top: 10px">可推断：{{ tier.inference }}</div>
+            <div class="muted" style="margin-top: 6px">限制：{{ tier.limit }}</div>
+          </article>
+        </div>
+      </article>
+    </section>
+
+    <section class="split-layout">
+      <article class="panel panel-tight">
+        <div class="section-header">
+          <div>
+            <span class="kicker">Failure Rules</span>
+            <h2>失败判据</h2>
+          </div>
+          <p>新版手稿把负面结果前置写入协议，后续实验出来后可以直接对应这些阈值填表。</p>
+        </div>
+
+        <div class="list-stack">
+          <div v-for="rule in paperWorkspace.failureCriteria" :key="rule" class="note-box">{{ rule }}</div>
+        </div>
+      </article>
+
+      <article class="panel panel-tight">
+        <div class="section-header">
+          <div>
+            <span class="kicker">Scope</span>
+            <h2>解释边界</h2>
+          </div>
+          <p>这部分是论文可信度的核心，不允许把结构风险分数直接扩写成态度或福利结论。</p>
+        </div>
+
+        <table class="table">
+          <tbody>
+            <tr>
+              <th>能做什么</th>
+              <td>
+                <div class="list-stack">
+                  <div v-for="item in paperWorkspace.boundaries.canDo" :key="item">{{ item }}</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>不能做什么</th>
+              <td>
+                <div class="list-stack">
+                  <div v-for="item in paperWorkspace.boundaries.cannotDo" :key="item">{{ item }}</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+
+    <section class="panel panel-tight">
+      <div class="section-header">
+        <div>
+          <span class="kicker">Deferred Figures</span>
+          <h2>结果与图形版位</h2>
+        </div>
+        <p>本页先固定论文结构与机制叙事，实验图表、数值和图形资产完成后将直接接入这一节奏中。</p>
+      </div>
+
+      <div class="grid grid-3">
+        <article v-for="item in paperWorkspace.deferredBlocks" :key="item.title" class="paper-card deferred-card">
+          <div class="metric-label">待更新</div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.summary }}</p>
         </article>
       </div>
     </section>
   </div>
 </template>
+
+<style scoped>
+.paper-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 18px;
+}
+
+.paper-hero h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", "Songti SC", serif;
+  font-size: clamp(28px, 3.2vw, 42px);
+  line-height: 1.1;
+}
+
+.paper-hero p {
+  margin: 16px 0 0;
+  color: var(--text-muted);
+  line-height: 1.85;
+}
+
+.paper-hero-side {
+  display: grid;
+  gap: 14px;
+}
+
+.anchor-card {
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.layer-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.layer-controller {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.stage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.stage-card {
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 248, 239, 0.86)),
+    radial-gradient(circle at top right, rgba(157, 88, 50, 0.12), transparent 42%);
+}
+
+.stage-card h3,
+.feature-card h3 {
+  margin: 8px 0 10px;
+}
+
+.stage-card p,
+.feature-card p {
+  margin: 0 0 16px;
+  color: var(--text-muted);
+  line-height: 1.75;
+}
+
+.stage-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(47, 93, 85, 0.12);
+  color: var(--accent-alt);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.feature-card {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 18px;
+  padding: 24px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.feature-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(157, 88, 50, 0.9), rgba(112, 55, 24, 0.86));
+  color: #fff8f1;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.feature-body {
+  display: grid;
+  gap: 2px;
+}
+
+.equation-chip {
+  width: fit-content;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(47, 93, 85, 0.18);
+  background: rgba(47, 93, 85, 0.08);
+  color: var(--accent-alt);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.deferred-card {
+  min-height: 182px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 248, 239, 0.72)),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 12px,
+      rgba(157, 88, 50, 0.04) 12px,
+      rgba(157, 88, 50, 0.04) 24px
+    );
+}
+
+@media (max-width: 1080px) {
+  .paper-hero,
+  .stage-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-card {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-symbol {
+    width: 74px;
+  }
+}
+</style>

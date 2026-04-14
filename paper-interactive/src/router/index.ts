@@ -16,8 +16,8 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/PaperWorkspaceView.vue'),
     meta: {
       title: '论文工作区',
-      kicker: 'Reserved Slots',
-      intro: '预留论文定稿页面，等待新摘要、图表和结果接入。',
+      kicker: 'Manuscript Briefing',
+      intro: '展示新版论文的对象分层、核心机制、理论边界与评估协议，图表与结果版位暂缓更新。',
     },
   },
   {

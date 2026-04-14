@@ -7,7 +7,7 @@
 1. `paper-interactive/`
    Vue 3 + Vite + TypeScript 前端。
 2. `content-source/`
-   综述正文、参考文献核验清单和本地 PDF。
+   综述正文、论文原稿副本、参考文献核验清单和本地 PDF。
 3. `scripts/`
    文献同步、核验和数据生成脚本。
 
@@ -39,6 +39,13 @@ python scripts/sync_content_source.py
 python scripts/fetch_reference_pdfs.py
 python scripts/build_literature_dataset.py
 ```
+
+同步内容包括：
+
+1. `../01_文献综述/扩展文献综述.md`
+2. `../paper_ipm_main.md`
+3. `../05_参考文献/verification_manifest.json`
+4. `../05_参考文献/pdfs/*.pdf`
 
 如果只改了前端，不需要跑同步脚本。
 
@@ -103,6 +110,6 @@ git push -u origin main
 
 ## 当前内容
 
-1. 旧论文图表、旧实验结果和旧双站结构已经移除。
+1. 论文工作区已同步新版手稿的对象层、机制层、理论边界与评估协议。
 2. 文献展示以附录参考文献和综述正文为主。
-3. 论文工作区只保留新稿接入所需模块。
+3. 图表、实验数值和插图版位已预留结构位置，待实验与绘图完成后直接替换。
