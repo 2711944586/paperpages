@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.site/
+__pycache__/
+*.pyc
+preview.out.log
+preview.err.log
+paper-interactive/public/references/
